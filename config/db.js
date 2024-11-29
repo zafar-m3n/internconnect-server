@@ -1,24 +1,28 @@
-const mysql = require("mysql");
+const { Sequelize } = require("sequelize");
+const dotenv = require("dotenv");
 const colors = require("colors");
 
-const connectDB = () => {
-  const connection = mysql.createConnection({
+dotenv.config();
+
+const sequelize = new Sequelize(
+  process.env.NODE_INTERNCONNECT_MYSQL_DATABASE,
+  process.env.NODE_INTERNCONNECT_MYSQL_USER,
+  process.env.NODE_INTERNCONNECT_MYSQL_PASSWORD,
+  {
     host: process.env.NODE_INTERNCONNECT_MYSQL_HOST,
-    user: process.env.NODE_INTERNCONNECT_MYSQL_USER,
-    password: process.env.NODE_INTERNCONNECT_MYSQL_PASSWORD,
-    database: process.env.NODE_INTERNCONNECT_MYSQL_DATABASE,
-  });
+    dialect: "mysql",
+    logging: false,
+  }
+);
 
-  connection.connect((err) => {
-    if (err) {
-      console.error(`Error: ${err.message}`.bgRed.white);
-      process.exit(1);
-    } else {
-      console.log(`MySQL Connected: ${connection.threadId}`.bgGreen.white);
-    }
-  });
-
-  return connection;
+const connectDB = async () => {
+  try {
+    await sequelize.authenticate();
+    console.log(`MySQL Connected: ${sequelize.config.host}`.bgGreen.white);
+  } catch (err) {
+    console.error(`Error: ${err.message}`.bgRed.white);
+    process.exit(1);
+  }
 };
 
-module.exports = connectDB;
+module.exports = { sequelize, connectDB };
