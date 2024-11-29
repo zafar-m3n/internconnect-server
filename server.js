@@ -20,7 +20,7 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(
-    `Server is running in ${process.env.NODE_MODE} mode on port ${PORT}`.bgCyan
+    `Server is running in ${process.env.NODE_INTERNCONNECT_MODE} mode on port ${PORT}`.bgCyan
       .white.bold
   );
 });
