@@ -2,9 +2,7 @@ const UserModel = require("../models/User");
 
 const authController = async (req, res) => {
   try {
-    // Use findByPk to find user by primary key (id)
     const user = await UserModel.findByPk(req.body.userId);
-
     if (!user) {
       return res.status(200).send({
         message: "User not found",
@@ -17,7 +15,6 @@ const authController = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log(error);
     res.status(500).send({
       message: "Authorization Error",
       success: false,
