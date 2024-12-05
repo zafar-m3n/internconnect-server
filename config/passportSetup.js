@@ -2,6 +2,7 @@ const passport = require("passport");
 const MicrosoftStrategy = require("passport-microsoft").Strategy;
 const { Sequelize, DataTypes } = require("sequelize");
 const { sequelize } = require("../config/db");
+const User = require("../models/User"); // Make sure to import your User model
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -29,44 +30,31 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        const currentUser = await sequelize.query(
-          "SELECT * FROM users WHERE microsoftId = :microsoftId",
-          {
-            replacements: { microsoftId: profile.id },
-            type: Sequelize.QueryTypes.SELECT,
-          }
-        );
+        // Try to find the user by Microsoft ID using Sequelize
+        const currentUser = await User.findOne({
+          where: { microsoftId: profile.id },
+        });
 
         console.log("Current user found:", currentUser);
 
-        if (currentUser && currentUser.length > 0) {
-          return done(null, currentUser[0]);
+        if (currentUser) {
+          // If the user exists, return them
+          return done(null, currentUser);
         } else {
-          const result = await sequelize.query(
-            "INSERT INTO users (microsoftId, name, email, profilePic) VALUES (:microsoftId, :name, :email, :profilePic)",
-            {
-              replacements: {
-                microsoftId: profile.id,
-                name: profile.displayName,
-                email: profile.emails[0].value,
-                profilePic: profile.photos
-                  ? profile.photos[0].value
-                  : "/images/profile.png",
-              },
-              type: Sequelize.QueryTypes.INSERT,
-            }
-          );
+          // If the user doesn't exist, create a new one
+          const newUser = await User.create({
+            microsoftId: profile.id,
+            name: profile.displayName,
+            email: profile.emails[0].value,
+            profilePic: profile.photos
+              ? profile.photos[0].value
+              : "/images/profile.png",
+          });
 
-          console.log("New user created with raw SQL:", result);
-          const newUser = await sequelize.query(
-            "SELECT * FROM users WHERE microsoftId = :microsoftId",
-            {
-              replacements: { microsoftId: profile.id },
-              type: Sequelize.QueryTypes.SELECT,
-            }
-          );
+          console.log("New user created:", newUser);
 
-          return done(null, newUser[0]);
+          // Return the newly created user
+          return done(null, newUser);
         }
       } catch (error) {
         console.error("Error processing user:", error);

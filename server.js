@@ -5,6 +5,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const { connectDB } = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
 const passportSetup = require("./config/passportSetup");
 
 dotenv.config();
@@ -17,13 +18,7 @@ app.use(morgan("dev"));
 app.use(cors());
 
 app.use("/api/v1/auth", authRoutes);
-
-// app.get("/", (req, res) => {
-//   res.status(200).send({
-//     success: true,
-//     message: "Server is running",
-//   });
-// });
+app.use("/api/v1/user", userRoutes);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
