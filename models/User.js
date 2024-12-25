@@ -46,6 +46,10 @@ const User = sequelize.define(
       type: DataTypes.JSON,
       defaultValue: [],
     },
+    batchCode: {
+      type: DataTypes.STRING,
+      defaultValue: "CBXXXXXX",
+    },
   },
   {
     tableName: "users",
