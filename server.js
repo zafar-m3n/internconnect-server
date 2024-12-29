@@ -7,6 +7,7 @@ const { connectDB } = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
+const cvRoutes = require("./routes/cvRoutes");
 const passportSetup = require("./config/passportSetup");
 
 dotenv.config();
@@ -21,6 +22,7 @@ app.use(cors());
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/upload", uploadRoutes);
+app.use("/api/v1/cv", cvRoutes);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
