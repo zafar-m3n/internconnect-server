@@ -43,6 +43,7 @@ exports.approveCV = async (req, res) => {
       title: "CV Approval",
       message: "Your CV has been approved.",
       isBatchNotification: false,
+      path: "/profile",
     });
 
     await UserNotification.create({
@@ -74,6 +75,7 @@ exports.rejectCV = async (req, res) => {
       title: "CV Rejection",
       message: `Your CV has been rejected. Reason: ${reason || "No reason provided."}`,
       isBatchNotification: false,
+      path: "/profile",
     });
 
     await UserNotification.create({

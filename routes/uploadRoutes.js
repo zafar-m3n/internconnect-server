@@ -1,4 +1,5 @@
 const express = require("express");
+const { formatName } = require("./../utils/formatName");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
@@ -27,6 +28,11 @@ router.post("/upload", upload.single("file"), async (req, res) => {
   const userId = req.body.userId;
 
   try {
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
     const relativePath = path.join("CVs", req.file.filename);
     const fileData = {
       userId,
@@ -35,35 +41,31 @@ router.post("/upload", upload.single("file"), async (req, res) => {
     };
 
     const existingFile = await CV.findOne({ where: { userId } });
+
     if (existingFile) {
       const fullPath = path.join(__dirname, "..", existingFile.path);
-
       if (fs.existsSync(fullPath)) {
         fs.unlinkSync(fullPath);
       } else {
         console.warn(`File not found, skipping deletion: ${fullPath}`);
       }
-
       await existingFile.update(fileData);
     } else {
       await CV.create(fileData);
     }
 
-    const user = await User.findByPk(userId);
     const admin = await User.findOne({ where: { isAdmin: true } });
-
     if (!admin) {
       return res.status(404).json({ message: "Admin user not found." });
     }
 
-    // Create a notification
     const notification = await Notification.create({
       title: "CV Upload",
-      message: `${user.name} has submitted a CV for approval.`,
+      message: `${formatName(user.name)} has submitted a CV for approval.`,
       isBatchNotification: false,
+      path: "/cvs",
     });
 
-    // Link the notification to the admin user
     await UserNotification.create({
       userId: admin.id,
       notificationId: notification.id,

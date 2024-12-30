@@ -18,6 +18,10 @@ const Notification = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: false,
     },
+    path: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     isBatchNotification: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,

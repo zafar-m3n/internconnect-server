@@ -14,9 +14,9 @@ User.associate = (models) => {
     as: "notifications",
   });
 
-  User.hasMany(models.CV, {
+  User.hasOne(models.CV, {
     foreignKey: "userId",
-    as: "cvs",
+    as: "cv",
   });
 };
 
