@@ -26,6 +26,11 @@ Notification.associate = (models) => {
     foreignKey: "notificationId",
     as: "users",
   });
+
+  Notification.hasMany(models.UserNotification, {
+    foreignKey: "notificationId",
+    as: "userNotifications",
+  });
 };
 
 UserNotification.associate = (models) => {

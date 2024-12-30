@@ -1,8 +1,10 @@
-const { User } = require("../models");
+const { User, Notification, UserNotification } = require("../models");
 
 const authController = async (req, res) => {
   try {
-    const user = await User.findByPk(req.body.userId);
+    const userId = req.body.userId;
+
+    const user = await User.findByPk(userId);
 
     if (!user) {
       return res.status(404).send({
@@ -11,10 +13,33 @@ const authController = async (req, res) => {
       });
     }
 
+    // Fetch individual notifications linked to the user
+    const individualNotifications = await Notification.findAll({
+      include: {
+        model: UserNotification,
+        as: "userNotifications",
+        where: { userId },
+      },
+    });
+
+    // Fetch batch notifications for the user's batch code
+    const batchNotifications = await Notification.findAll({
+      where: {
+        isBatchNotification: true,
+        batchCode: user.batchCode,
+      },
+    });
+
+    // Combine both individual and batch notifications
+    const notifications = [...individualNotifications, ...batchNotifications];
+
     res.status(200).send({
       success: true,
       message: "User found successfully",
-      data: user,
+      data: {
+        user,
+        notifications,
+      },
     });
   } catch (error) {
     console.error(error.message);
