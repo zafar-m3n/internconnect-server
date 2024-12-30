@@ -11,7 +11,6 @@ const router = express.Router();
 const uploadDir = path.join(__dirname, "..", "CVs");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
-  console.log("CVs directory created.");
 }
 
 const storage = multer.diskStorage({
@@ -30,20 +29,19 @@ router.post("/upload", upload.single("file"), async (req, res) => {
   const userId = req.body.userId;
 
   try {
+    const relativePath = path.join("CVs", req.file.filename);
     const fileData = {
       userId,
       filename: req.file.filename,
-      path: req.file.path,
+      path: relativePath,
     };
 
     const existingFile = await CV.findOne({ where: { userId } });
-
     if (existingFile) {
       const fullPath = path.join(__dirname, "..", existingFile.path);
 
       if (fs.existsSync(fullPath)) {
         fs.unlinkSync(fullPath);
-        console.log(`Successfully deleted old CV: ${fullPath}`);
       } else {
         console.warn(`File not found, skipping deletion: ${fullPath}`);
       }
@@ -66,6 +64,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
       },
     ];
     await admin.update({ notifications: updatedNotifications });
+
     res.status(200).json({ message: "CV uploaded successfully!" });
   } catch (error) {
     console.error(error.message);

@@ -8,7 +8,7 @@ exports.getCVByUserId = async (req, res) => {
     const userCV = await CV.findOne({ where: { userId } });
 
     if (!userCV) {
-      return res.status(404).json({ message: "No CV found for this user." });
+      return res.status(404).json({ message: "No CV uploaded." });
     }
 
     res.status(200).json(userCV);
