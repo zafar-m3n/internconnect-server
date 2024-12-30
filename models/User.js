@@ -38,14 +38,6 @@ const User = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
-    notifications: {
-      type: DataTypes.JSON,
-      defaultValue: [],
-    },
-    seenNotifications: {
-      type: DataTypes.JSON,
-      defaultValue: [],
-    },
     batchCode: {
       type: DataTypes.STRING,
       defaultValue: "CBXXXXXX",
@@ -56,5 +48,13 @@ const User = sequelize.define(
     timestamps: true,
   }
 );
+
+User.associate = (models) => {
+  User.belongsToMany(models.Notification, {
+    through: models.UserNotification,
+    foreignKey: "userId",
+    as: "notifications",
+  });
+};
 
 module.exports = User;

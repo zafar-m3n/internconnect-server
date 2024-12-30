@@ -1,5 +1,4 @@
-const CV = require("../models/CV");
-const User = require("../models/User");
+const { CV, User, Notification, UserNotification } = require("../models");
 
 exports.getCVByUserId = async (req, res) => {
   const userId = req.body.userId;
@@ -29,7 +28,7 @@ exports.getAllCVs = async (req, res) => {
 };
 
 exports.approveCV = async (req, res) => {
-  const { id } = req.params; 
+  const { id } = req.params;
 
   try {
     const cv = await CV.findByPk(id);
@@ -40,12 +39,16 @@ exports.approveCV = async (req, res) => {
 
     await cv.update({ status: "approved" });
 
-    const user = await User.findByPk(cv.userId);
-    user.notifications.push({
-      type: "CV Approval",
+    const notification = await Notification.create({
+      title: "CV Approval",
       message: "Your CV has been approved.",
+      isBatchNotification: false,
     });
-    await user.save();
+
+    await UserNotification.create({
+      userId: cv.userId,
+      notificationId: notification.id,
+    });
 
     res.status(200).json({ message: "CV approved successfully." });
   } catch (error) {
@@ -53,7 +56,6 @@ exports.approveCV = async (req, res) => {
     res.status(500).json({ message: "An error occurred while approving the CV." });
   }
 };
-
 
 exports.rejectCV = async (req, res) => {
   const { id } = req.params;
@@ -68,12 +70,16 @@ exports.rejectCV = async (req, res) => {
 
     await cv.update({ status: "rejected" });
 
-    const user = await User.findByPk(cv.userId);
-    user.notifications.push({
-      type: "CV Rejection",
+    const notification = await Notification.create({
+      title: "CV Rejection",
       message: `Your CV has been rejected. Reason: ${reason || "No reason provided."}`,
+      isBatchNotification: false,
     });
-    await user.save();
+
+    await UserNotification.create({
+      userId: cv.userId,
+      notificationId: notification.id,
+    });
 
     res.status(200).json({ message: "CV rejected successfully." });
   } catch (error) {

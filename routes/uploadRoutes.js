@@ -2,9 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
-
-const CV = require("../models/CV");
-const User = require("../models/User");
+const { CV, User, Notification, UserNotification } = require("../models");
 
 const router = express.Router();
 
@@ -53,17 +51,23 @@ router.post("/upload", upload.single("file"), async (req, res) => {
 
     const user = await User.findByPk(userId);
     const admin = await User.findOne({ where: { isAdmin: true } });
-    const notificationMessage = `${user.name} has submitted a CV for approval.`;
 
-    const updatedNotifications = [
-      ...admin.notifications,
-      {
-        type: "CV Upload",
-        message: notificationMessage,
-        path: `/cvs`,
-      },
-    ];
-    await admin.update({ notifications: updatedNotifications });
+    if (!admin) {
+      return res.status(404).json({ message: "Admin user not found." });
+    }
+
+    // Create a notification
+    const notification = await Notification.create({
+      title: "CV Upload",
+      message: `${user.name} has submitted a CV for approval.`,
+      isBatchNotification: false,
+    });
+
+    // Link the notification to the admin user
+    await UserNotification.create({
+      userId: admin.id,
+      notificationId: notification.id,
+    });
 
     res.status(200).json({ message: "CV uploaded successfully!" });
   } catch (error) {
