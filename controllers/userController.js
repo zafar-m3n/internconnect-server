@@ -1,4 +1,5 @@
 const { User, Notification, UserNotification } = require("../models");
+const { Sequelize } = require("sequelize");
 
 const authController = async (req, res) => {
   try {
@@ -61,7 +62,6 @@ const updateUserController = async (req, res) => {
       });
     }
 
-    // Update user information with the request body
     await user.update(req.body);
 
     res.status(200).send({
@@ -79,4 +79,61 @@ const updateUserController = async (req, res) => {
   }
 };
 
-module.exports = { authController, updateUserController };
+const markNotificationsAsRead = async (req, res) => {
+  try {
+    const userId = req.body.userId;
+    const result = await UserNotification.update(
+      { seenAt: new Date() },
+      {
+        where: {
+          userId,
+          seenAt: null,
+        },
+      }
+    );
+
+    if (result[0] === 0) {
+      return res.status(200).json({
+        success: false,
+        message: "You have no unread notifications.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "All notifications marked as read.",
+    });
+  } catch (error) {
+    console.error("Error marking notifications as read:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+const deleteReadNotifications = async (req, res) => {
+  try {
+    const userId = req.body.userId;
+    const result = await UserNotification.destroy({
+      where: {
+        userId,
+        seenAt: { [Sequelize.Op.ne]: null },
+      },
+    });
+
+    if (result === 0) {
+      return res.status(200).json({
+        success: false,
+        message: "You have no read notifications.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "All read notifications deleted.",
+    });
+  } catch (error) {
+    console.error("Error deleting read notifications:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+module.exports = { authController, updateUserController, markNotificationsAsRead, deleteReadNotifications };
