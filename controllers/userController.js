@@ -22,7 +22,6 @@ const authController = async (req, res) => {
       },
     });
 
-    // Fetch batch notifications for the user's batch code
     const batchNotifications = await Notification.findAll({
       where: {
         isBatchNotification: true,
