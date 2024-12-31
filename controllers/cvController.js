@@ -123,11 +123,14 @@ exports.rejectCV = async (req, res) => {
       });
     }
 
-    await cv.update({ status: "rejected" });
+    await cv.update({
+      status: "rejected",
+      rejectionReason: reason,
+    });
 
     const notification = await Notification.create({
       title: "CV Rejection",
-      message: `Your CV has been rejected. Click to view more details."}`,
+      message: `Your CV has been rejected. Click to view more details.`,
       isBatchNotification: false,
       path: "/profile",
     });

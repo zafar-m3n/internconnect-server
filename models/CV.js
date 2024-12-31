@@ -29,6 +29,10 @@ const CV = sequelize.define(
       type: DataTypes.DATE,
       defaultValue: Sequelize.NOW,
     },
+    rejectionReason: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     timestamps: false,
