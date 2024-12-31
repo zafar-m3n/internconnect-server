@@ -38,6 +38,7 @@ router.post("/upload", upload.single("file"), async (req, res) => {
       userId,
       filename: req.file.filename,
       path: relativePath,
+      status: "pending",
     };
 
     const existingFile = await CV.findOne({ where: { userId } });
